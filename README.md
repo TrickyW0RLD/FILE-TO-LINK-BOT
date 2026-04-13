@@ -82,15 +82,7 @@ To run this bot, you need to set up the following environment variables:
 
 ---
 
-## 🤝 Contributors
 
-A huge thanks to the developers who made this project possible:
-
-<div align="center">
-
-| [**Abhi**](https://t.me/about_zani/143) | [**Abhinav**](https://t.me/adityaabhinav) | [**Master**](https://t.me/V_Sbotmaker) |
-| :---: | :---: | :---: |
-| Owner | Developer | Developer |
 
 </div>
 
@@ -99,12 +91,3 @@ Special thanks to [**Botsthe**](https://github.com/Botsthe/FILE-TO-LINK-BOT) for
 
 ---
 
-## 📞 Support
-
-For queries, feature requests, or bug reports, join our official channel:
-
-<div align="center">
-  <a href="https://t.me/cantarellabots">
-    <img src="https://img.shields.io/badge/CantarellaBots%20Channel-blue?style=for-the-badge&logo=telegram">
-  </a>
-</div>
