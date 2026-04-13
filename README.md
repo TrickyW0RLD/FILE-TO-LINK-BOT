@@ -1,4 +1,4 @@
-# <div align="center">🚀 CantarellaBots - Advanced File to Link Bot</div>
+# <div align="center">🚀 TrickyWORLD - Advanced File to Link Bot</div>
 
 <div align="center">
 
