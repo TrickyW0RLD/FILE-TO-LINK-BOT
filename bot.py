@@ -2,7 +2,7 @@ import os, sys, asyncio, logging, re, json, time
 from datetime import datetime
 from urllib.parse import quote_plus
 
-# Event loop fix for Python 3.10+
+# Event loop fix for Python 3.10+ ok
 try:
     loop = asyncio.get_running_loop()
 except RuntimeError:
