@@ -1,43 +1,29 @@
 import os
 from Script import script
 
-# ========== REQUIRED (Render environment se lega) ==========
+# ========== RENDER ENVIRONMENT VARIABLES ==========
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 API_ID = int(os.environ.get("API_ID", 0))
 API_HASH = os.environ.get("API_HASH", "")
-
-# ========== SESSION FIX (error se bachne ke liye) ==========
 SESSION = os.environ.get("SESSION", "FileLinkBot")
+PORT = int(os.environ.get("PORT", 8080))
 
-# ========== ADMINS (space separated IDs) ==========
+# ========== ADMINS ==========
 ADMINS = [int(i) for i in os.environ.get("ADMINS", "").split() if i]
 
-# ========== FORCE SUBSCRIBE CHANNELS (space separated IDs) ==========
+# ========== FORCE SUBSCRIBE CHANNELS ==========
 AUTH_CHANNEL = [int(i) for i in os.environ.get("AUTH_CHANNEL", "").split() if i]
-FSUB = os.environ.get("FSUB", "True").lower() == "true"
 
 # ========== LOG & BIN CHANNELS ==========
 LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", 0))
 BIN_CHANNEL = int(os.environ.get("BIN_CHANNEL", 0))
-PREMIUM_LOGS = int(os.environ.get("PREMIUM_LOGS", 0))
-VERIFIED_LOG = int(os.environ.get("VERIFIED_LOG", 0))
-SUPPORT_GROUP = int(os.environ.get("SUPPORT_GROUP", 0))
 
 # ========== SUPPORT LINKS ==========
 CHANNEL = os.environ.get("CHANNEL", "https://t.me/Anime_Hindii_Flixx")
 SUPPORT = os.environ.get("SUPPORT", "https://t.me/Anime_Hindii_Flixx")
 
-# ========== FEATURE TOGGLES ==========
-VERIFY = False
-ENABLE_LIMIT = os.environ.get("ENABLE_LIMIT", "True").lower() == "true"
-BATCH_VERIFY = False
-IS_SHORTLINK = False   # Default off, admin can turn on via command
-MAINTENANCE_MODE = os.environ.get("MAINTENANCE_MODE", "False").lower() == "true"
-PROTECT_CONTENT = os.environ.get("PROTECT_CONTENT", "False").lower() == "true"
-PUBLIC_FILE_STORE = False   # OFF: sirf admin upload
-BATCH_PROTECT_CONTENT = False
-
-# ========== SHORTLINK API (optional) ==========
+# ========== SHORTLINK ==========
+IS_SHORTLINK = False
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "")
 
@@ -45,33 +31,15 @@ SHORTLINK_API = os.environ.get("SHORTLINK_API", "")
 DB_URL = os.environ.get("DATABASE_URI", "")
 DB_NAME = os.environ.get("DATABASE_NAME", "filelinkbot")
 
-# ========== IMAGES & CAPTIONS ==========
-QR_CODE = os.environ.get("QR_CODE", "https://graph.org/file/default.jpg")
-VERIFY_IMG = os.environ.get("VERIFY_IMG", "https://graph.org/file/default.jpg")
-AUTH_PICS = os.environ.get("AUTH_PICS", "https://graph.org/file/default.jpg")
-PICS = os.environ.get("PICS", "https://graph.org/file/default.jpg")
-FILE_PIC = os.environ.get("FILE_PIC", "https://graph.org/file/default.jpg")
+# ========== FEATURES ==========
+PUBLIC_FILE_STORE = False   # Only admin upload
+FSUB = True if AUTH_CHANNEL else False
+PROTECT_CONTENT = False
+ENABLE_LIMIT = True
 
-FILE_CAPTION = os.environ.get("FILE_CAPTION", script.CAPTION)
-BATCH_FILE_CAPTION = os.environ.get("BATCH_FILE_CAPTION", script.CAPTION)
-CHANNEL_FILE_CAPTION = os.environ.get("CHANNEL_FILE_CAPTION", script.CAPTION)
-
-# ========== TIME & LIMITS ==========
-PING_INTERVAL = int(os.environ.get("PING_INTERVAL", 1200))
-SLEEP_THRESHOLD = int(os.environ.get("SLEEP_THRESHOLD", 60))
-RATE_LIMIT_TIMEOUT = int(os.environ.get("RATE_LIMIT_TIMEOUT", 600))
-MAX_FILES = int(os.environ.get("MAX_FILES", 50))
-VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", 60))
-
-# ========== WORKERS ==========
-WORKERS = int(os.environ.get("WORKERS", 10))
-MULTI_CLIENT = False
-NAME = os.environ.get("NAME", "FileLinkBot")
-
-# ========== WEB SERVER (RENDER) ==========
-ON_HEROKU = 'DYNO' in os.environ
-ON_RENDER = 'RENDER' in os.environ
-PORT = int(os.environ.get("PORT", 8080))
+# ========== WEB SERVER (Render) ==========
+ON_HEROKU = False
+ON_RENDER = True
 NO_PORT = os.environ.get("NO_PORT", "true").lower() in ("true", "1", "yes")
 HAS_SSL = os.environ.get("HAS_SSL", "true").lower() in ("true", "1", "yes")
 
@@ -88,3 +56,5 @@ if not FQDN.startswith("http"):
     URL = f"{protocol}://{FQDN}{port_segment}/"
 else:
     URL = FQDN
+
+WORKERS = 10
