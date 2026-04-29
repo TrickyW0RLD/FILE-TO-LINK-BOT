@@ -88,3 +88,4 @@ if not FQDN.startswith("http"):
     URL = f"{protocol}://{FQDN}{port_segment}/"
 else:
     URL = FQDN
+    
