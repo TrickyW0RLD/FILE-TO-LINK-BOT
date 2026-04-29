@@ -1,4 +1,4 @@
-import os, sys, asyncio, logging, re, json, time
+import os, sys, asyncio, logging, re, json, time, random, string
 from datetime import datetime
 from urllib.parse import quote_plus
 
@@ -9,7 +9,7 @@ except RuntimeError:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-from pyrogram import idle, filters, Client, enums
+from pyrogram import idle, filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, BotCommand
 from pyrogram.errors import UserNotParticipant
 import pyrogram.utils
@@ -22,11 +22,10 @@ from web.server import StreamBot
 from utils import Temp
 from web.server.clients import initialize_clients
 
-# Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# ========== DYNAMIC CONFIG (no redeploy) ==========
+# ========== DYNAMIC CONFIG ==========
 CONFIG_FILE = "config.json"
 
 def load_config():
@@ -41,7 +40,8 @@ def load_config():
         "channel": CHANNEL,
         "caption_prefix": "✨ **Shared by:** @Anime_Hindii_Flixx",
         "remove_links": True,
-        "force_sub_channels": AUTH_CHANNEL
+        "force_sub_channels": AUTH_CHANNEL,
+        "banned_users": []
     }
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r") as f:
@@ -73,6 +73,9 @@ pyrogram.utils.MIN_CHANNEL_ID = -1002822095763
 # ========== HELPERS ==========
 async def is_admin(user_id):
     return user_id in config["admins"]
+
+async def is_banned(user_id):
+    return user_id in config.get("banned_users", [])
 
 async def check_force_sub(user_id):
     if not config.get("force_sub_channels"):
@@ -148,55 +151,134 @@ async def forward_to_bin(message):
     direct_link = f"{URL}/watch/{fid}" if fid and URL else None
     return fid, direct_link
 
-# ========== BATCH COMMAND ==========
-@StreamBot.on_message(filters.command(["batch"]) & filters.user(config["admins"]))
-async def batch_cmd(client: Client, message: Message):
-    subscribed, msg, kb = await check_force_sub(message.from_user.id)
+# ========== COMMANDS ==========
+
+@StreamBot.on_message(filters.command(["start"]))
+async def start_cmd(client: Client, message: Message):
+    user_id = message.from_user.id
+    if await is_banned(user_id):
+        await message.reply("❌ You are banned from using this bot.")
+        return
+    subscribed, msg, kb = await check_force_sub(user_id)
     if not subscribed:
         await message.reply_text(msg, reply_markup=kb)
         return
-    await message.reply_text("Send me the **first message link** (from a public channel).")
-    first = None
-    async for m in client.listen(message.chat.id, timeout=60):
-        if m.text and ("t.me/" in m.text):
-            first = m.text
-            break
-        else:
-            await m.reply("Please send a valid Telegram message link.")
-    if not first:
-        await message.reply("Timeout.")
+    text = """**🤖 Available Commands:**
+
+/start - Check I am alive
+/genlink - Store a single message or file
+/batch - Store multiple messages from a channel
+/custom_batch - Store multiple random messages
+/special_link - Store a message and get editable link (moderators only)
+/broadcast - Broadcast a message to users (moderators only)
+/settings - Customize your settings
+/universal_link - Store multiple messages accessible from anywhere
+/shortener - Shorten any shareable link
+/ban - Ban a user (moderators only)
+/unban - Unban a user (moderators only)
+
+Send any file to get a download link (admin only)."""
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📢 Support", url=config['support'])],
+        [InlineKeyboardButton("📝 Channel", url=config['channel'])]
+    ])
+    await message.reply_text(text, reply_markup=buttons)
+
+@StreamBot.on_message(filters.command(["genlink"]) & filters.user(config["admins"]))
+async def genlink_cmd(client: Client, message: Message):
+    user_id = message.from_user.id
+    if await is_banned(user_id):
+        await message.reply("❌ Banned.")
         return
-    await message.reply_text("Now send the **last message link**.")
-    last = None
-    async for m in client.listen(message.chat.id, timeout=60):
-        if m.text and ("t.me/" in m.text):
-            last = m.text
-            break
-        else:
-            await m.reply("Send a valid link.")
-    if not last:
-        await message.reply("Timeout.")
+    subscribed, msg, kb = await check_force_sub(user_id)
+    if not subscribed:
+        await message.reply_text(msg, reply_markup=kb)
         return
-    # Extract IDs
-    def extract(link):
-        match = re.search(r't\.me/(?:c/)?(\d+)/(\d+)', link) or re.search(r't\.me/([^/]+)/(\d+)', link)
-        if match:
-            chat = match.group(1)
-            msg_id = int(match.group(2))
-            if chat.isdigit():
-                chat_id = int("-100" + chat)
+    await message.reply_text("Send me any file (photo, video, document, audio).")
+    async for resp in client.listen(message.chat.id, timeout=60):
+        if resp.media:
+            fid, direct_link = await forward_to_bin(resp)
+            if not direct_link:
+                await resp.reply("❌ BIN_CHANNEL not set.")
+                return
+            if config["shortlink_enabled"]:
+                short_url = await get_shortlink(direct_link)
+                reply_text = f"🔗 [Click here to get file]({short_url})"
+                reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("📥 Download", url=short_url)]])
             else:
-                chat_id = chat
-            return chat_id, msg_id
-        return None, None
-    first_chat, first_id = extract(first)
-    last_chat, last_id = extract(last)
-    if first_chat != last_chat or not first_chat:
-        await message.reply("Both links must be from the same public channel.")
+                reply_text = f"🔗 Direct Link:\n{direct_link}"
+                reply_markup = None
+            await message.reply_text(reply_text, disable_web_page_preview=True, reply_markup=reply_markup)
+            return
+        else:
+            await resp.reply("Please send a valid file.")
+    await message.reply("Timeout. /genlink cancelled.")
+
+@StreamBot.on_message(filters.command(["batch"]) & filters.user(config["admins"]))
+async def batch_cmd(client: Client, message: Message):
+    user_id = message.from_user.id
+    if await is_banned(user_id):
+        await message.reply("❌ Banned.")
+        return
+    subscribed, msg, kb = await check_force_sub(user_id)
+    if not subscribed:
+        await message.reply_text(msg, reply_markup=kb)
+        return
+    await message.reply_text(
+        "📌 **Batch Mode**\n\n"
+        "**Forward** me the **first message** from your batch channel (with forward tag)\n"
+        "– OR –\n"
+        "Send me the **first message link**."
+    )
+    first_chat, first_id = None, None
+    async for resp in client.listen(message.chat.id, timeout=120):
+        if resp.forward_from_chat:
+            first_chat = resp.forward_from_chat.id
+            first_id = resp.forward_from_message_id
+            break
+        elif resp.text and "t.me/" in resp.text:
+            match = re.search(r't\.me/(?:c/)?(\d+)/(\d+)', resp.text) or re.search(r't\.me/([^/]+)/(\d+)', resp.text)
+            if match:
+                chat = match.group(1)
+                msg_id = int(match.group(2))
+                if chat.isdigit():
+                    first_chat = int("-100" + chat)
+                else:
+                    first_chat = chat
+                first_id = msg_id
+                break
+        await resp.reply("Please forward or send a valid link.")
+    if not first_chat:
+        await message.reply("Timeout.")
+        return
+    await message.reply_text("Now **forward** or **send link** of the **last message**.")
+    last_chat, last_id = None, None
+    async for resp in client.listen(message.chat.id, timeout=120):
+        if resp.forward_from_chat:
+            last_chat = resp.forward_from_chat.id
+            last_id = resp.forward_from_message_id
+            break
+        elif resp.text and "t.me/" in resp.text:
+            match = re.search(r't\.me/(?:c/)?(\d+)/(\d+)', resp.text) or re.search(r't\.me/([^/]+)/(\d+)', resp.text)
+            if match:
+                chat = match.group(1)
+                msg_id = int(match.group(2))
+                if chat.isdigit():
+                    last_chat = int("-100" + chat)
+                else:
+                    last_chat = chat
+                last_id = msg_id
+                break
+        await resp.reply("Please forward or send a valid link.")
+    if not last_chat:
+        await message.reply("Timeout.")
+        return
+    if first_chat != last_chat:
+        await message.reply("Both messages must be from the same channel.")
         return
     if first_id > last_id:
         first_id, last_id = last_id, first_id
-    await message.reply(f"Collecting {first_id} to {last_id} ...")
+    await message.reply(f"🔄 Collecting {first_id} → {last_id} ...")
     collected = []
     for mid in range(first_id, last_id + 1):
         try:
@@ -225,15 +307,213 @@ async def batch_cmd(client: Client, message: Message):
     batch_id = str(int(time.time()))
     with open(f"batch_{batch_id}.json", "w") as f:
         json.dump({"file_ids": file_ids, "count": len(file_ids)}, f)
-    await message.reply_text(f"✅ Batch created! {len(file_ids)} files.\nBatch ID: `{batch_id}` (admin use)")
+    await message.reply_text(f"✅ Batch created! {len(file_ids)} files. Batch ID: `{batch_id}`")
 
-# ========== FILE HANDLER (only admin upload) ==========
+@StreamBot.on_message(filters.command(["custom_batch"]) & filters.user(config["admins"]))
+async def custom_batch_cmd(client: Client, message: Message):
+    await message.reply_text("Send me multiple message links (one per line). When done, send /done.")
+    links = []
+    while True:
+        resp = await client.listen(message.chat.id, timeout=60)
+        if resp.text and resp.text == "/done":
+            break
+        elif resp.text and "t.me/" in resp.text:
+            links.append(resp.text)
+            await resp.reply("✅ Added. Send more or /done")
+        else:
+            await resp.reply("Send a valid Telegram message link.")
+    if not links:
+        await message.reply("No links provided.")
+        return
+    collected = []
+    for link in links:
+        match = re.search(r't\.me/(?:c/)?(\d+)/(\d+)', link) or re.search(r't\.me/([^/]+)/(\d+)', link)
+        if match:
+            chat = match.group(1)
+            msg_id = int(match.group(2))
+            if chat.isdigit():
+                chat_id = int("-100" + chat)
+            else:
+                chat_id = chat
+            try:
+                msg_obj = await client.get_messages(chat_id, msg_id)
+                if msg_obj and msg_obj.media:
+                    collected.append(msg_obj)
+            except:
+                pass
+    if not collected:
+        await message.reply("No media found.")
+        return
+    bin_ch = config.get("bin_channel", BIN_CHANNEL)
+    if not bin_ch:
+        await message.reply("BIN_CHANNEL not set.")
+        return
+    file_ids = []
+    for m in collected:
+        try:
+            sent = await m.copy(chat_id=bin_ch)
+            fid = sent.document.file_id if sent.document else sent.video.file_id if sent.video else sent.audio.file_id if sent.audio else sent.photo.file_id if sent.photo else None
+            if fid:
+                file_ids.append(fid)
+        except:
+            pass
+    batch_id = str(int(time.time()))
+    with open(f"custom_batch_{batch_id}.json", "w") as f:
+        json.dump({"file_ids": file_ids, "count": len(file_ids)}, f)
+    await message.reply_text(f"✅ Custom batch created! {len(file_ids)} files. Batch ID: `{batch_id}`")
+
+@StreamBot.on_message(filters.command(["special_link"]) & filters.user(config["admins"]))
+async def special_link_cmd(client: Client, message: Message):
+    await message.reply_text("Forward me the file/message. I will give you an editable link.")
+    async for resp in client.listen(message.chat.id, timeout=60):
+        if resp.media:
+            fid, direct_link = await forward_to_bin(resp)
+            if not direct_link:
+                await resp.reply("BIN_CHANNEL not set.")
+                return
+            edit_id = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            with open(f"edit_{edit_id}.json", "w") as f:
+                json.dump({"fid": fid, "original_link": direct_link}, f)
+            editable_link = f"{URL}/edit/{edit_id}"
+            await message.reply_text(f"🔗 Editable link (moderators only):\n{editable_link}\n\nYou can change the caption etc. later.")
+            return
+        else:
+            await resp.reply("Please send a file.")
+    await message.reply("Timeout.")
+
+@StreamBot.on_message(filters.command(["broadcast"]) & filters.user(config["admins"]))
+async def broadcast_cmd(client: Client, message: Message):
+    if message.reply_to_message:
+        await message.reply_text("Broadcasting... (demo) Implement DB for full feature.")
+        await message.reply_text("✅ Broadcast sent (demo).")
+    else:
+        await message.reply_text("Reply to a message with /broadcast.")
+
+@StreamBot.on_message(filters.command(["settings"]))
+async def settings_cmd(client: Client, message: Message):
+    user_id = message.from_user.id
+    if await is_banned(user_id):
+        await message.reply("You are banned.")
+        return
+    subscribed, msg, kb = await check_force_sub(user_id)
+    if not subscribed:
+        await message.reply_text(msg, reply_markup=kb)
+        return
+    if await is_admin(user_id):
+        text = f"**Admin Settings**\n\nShortlink: {config['shortlink_enabled']}\nAdmins: {config['admins']}"
+        await message.reply_text(text)
+    else:
+        await message.reply_text("User settings: Not implemented yet.")
+
+@StreamBot.on_message(filters.command(["universal_link"]) & filters.user(config["admins"]))
+async def universal_link_cmd(client: Client, message: Message):
+    await message.reply_text("Send me multiple message links (one per line). Final /done.")
+    links = []
+    while True:
+        resp = await client.listen(message.chat.id, timeout=60)
+        if resp.text and resp.text == "/done":
+            break
+        elif resp.text and "t.me/" in resp.text:
+            links.append(resp.text)
+            await resp.reply("Added.")
+        else:
+            await resp.reply("Send a valid link.")
+    if not links:
+        await message.reply("No links.")
+        return
+    collected = []
+    for link in links:
+        match = re.search(r't\.me/(?:c/)?(\d+)/(\d+)', link) or re.search(r't\.me/([^/]+)/(\d+)', link)
+        if match:
+            chat = match.group(1)
+            msg_id = int(match.group(2))
+            if chat.isdigit():
+                chat_id = int("-100" + chat)
+            else:
+                chat_id = chat
+            try:
+                msg_obj = await client.get_messages(chat_id, msg_id)
+                if msg_obj and msg_obj.media:
+                    collected.append(msg_obj)
+            except:
+                pass
+    if not collected:
+        await message.reply("No media.")
+        return
+    bin_ch = config.get("bin_channel", BIN_CHANNEL)
+    if not bin_ch:
+        await message.reply("BIN_CHANNEL not set.")
+        return
+    file_ids = []
+    for m in collected:
+        try:
+            sent = await m.copy(chat_id=bin_ch)
+            fid = sent.document.file_id if sent.document else sent.video.file_id if sent.video else sent.audio.file_id if sent.audio else sent.photo.file_id if sent.photo else None
+            if fid:
+                file_ids.append(fid)
+        except:
+            pass
+    univ_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    with open(f"universal_{univ_id}.json", "w") as f:
+        json.dump({"file_ids": file_ids, "count": len(file_ids)}, f)
+    universal_link = f"{URL}/universal/{univ_id}"
+    await message.reply_text(f"✅ Universal link created:\n{universal_link}\n(accessible from anywhere)")
+
+@StreamBot.on_message(filters.command(["shortener"]))
+async def shortener_cmd(client: Client, message: Message):
+    user_id = message.from_user.id
+    if await is_banned(user_id):
+        await message.reply("You are banned.")
+        return
+    subscribed, msg, kb = await check_force_sub(user_id)
+    if not subscribed:
+        await message.reply_text(msg, reply_markup=kb)
+        return
+    args = message.text.split(maxsplit=1)
+    if len(args) != 2:
+        await message.reply_text("Usage: /shortener <URL>")
+        return
+    url = args[1]
+    short_url = await get_shortlink(url)
+    await message.reply_text(f"🔗 Shortened link:\n{short_url}")
+
+@StreamBot.on_message(filters.command(["ban"]) & filters.user(config["admins"]))
+async def ban_cmd(client: Client, message: Message):
+    try:
+        user_id = int(message.text.split()[1])
+        if user_id not in config["banned_users"]:
+            config["banned_users"].append(user_id)
+            save_config(config)
+            await message.reply(f"✅ User {user_id} banned.")
+        else:
+            await message.reply("Already banned.")
+    except:
+        await message.reply("Usage: /ban <user_id>")
+
+@StreamBot.on_message(filters.command(["unban"]) & filters.user(config["admins"]))
+async def unban_cmd(client: Client, message: Message):
+    try:
+        user_id = int(message.text.split()[1])
+        if user_id in config["banned_users"]:
+            config["banned_users"].remove(user_id)
+            save_config(config)
+            await message.reply(f"✅ User {user_id} unbanned.")
+        else:
+            await message.reply("Not banned.")
+    except:
+        await message.reply("Usage: /unban <user_id>")
+
+# ========== FILE HANDLER (admin only) ==========
 @StreamBot.on_message(filters.document | filters.video | filters.audio | filters.photo | filters.animation)
 async def file_handler(client: Client, message: Message):
-    if not await is_admin(message.from_user.id):
+    user_id = message.from_user.id
+    if await is_banned(user_id):
+        await message.reply("❌ You are banned.")
+        return
+    if not await is_admin(user_id):
         await message.reply_text("❌ **Only admins can upload files.**\nPublic file store is OFF.")
         return
-    subscribed, msg, kb = await check_force_sub(message.from_user.id)
+    subscribed, msg, kb = await check_force_sub(user_id)
     if not subscribed:
         await message.reply_text(msg, reply_markup=kb)
         return
@@ -247,141 +527,33 @@ async def file_handler(client: Client, message: Message):
             return
         if config["shortlink_enabled"]:
             short_url = await get_shortlink(direct_link)
-            reply_text = f"🔗 [Click here to get file]({short_url})\n\nVisit the link and press Verify."
+            reply_text = f"🔗 [Click here to get file]({short_url})"
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("📥 Download", url=short_url)]])
         else:
             reply_text = f"🔗 Direct Link:\n{direct_link}"
-        # caption fix
-        orig_cap = message.caption or ""
+            reply_markup = None
         fname = media.file_name if hasattr(media, 'file_name') else "file"
-        # No thumbnail: we don't send any thumbnail
-        await message.reply_text(reply_text, disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📥 Download", url=short_url)]]) if config["shortlink_enabled"] else None)
-        # log
+        await message.reply_text(reply_text, disable_web_page_preview=True, reply_markup=reply_markup)
         if config.get("log_channel"):
             await client.send_message(config["log_channel"], f"📁 Admin {message.from_user.mention} uploaded: {fname}")
     except Exception as e:
         logger.error(e)
         await message.reply("Error processing file.")
 
-# ========== START / COMMANDS ==========
-@StreamBot.on_message(filters.command(["start"]))
-async def start_cmd(client: Client, message: Message):
-    subscribed, msg, kb = await check_force_sub(message.from_user.id)
-    if not subscribed:
-        await message.reply_text(msg, reply_markup=kb)
-        return
-    buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📋 Commands", callback_data="help")],
-        [InlineKeyboardButton("ℹ️ About", callback_data="about"), InlineKeyboardButton("📢 Support", callback_data="support")],
-        [InlineKeyboardButton("⚙️ Admin Panel", callback_data="admin_panel")] if await is_admin(message.from_user.id) else []
-    ])
-    await message.reply_text(f"**Welcome {message.from_user.mention}**\n\nSend any file (admin only) to get link.", reply_markup=buttons)
-
-@StreamBot.on_message(filters.command(["help"]))
-async def help_cmd(client: Client, message: Message):
-    subscribed, msg, kb = await check_force_sub(message.from_user.id)
-    if not subscribed:
-        await message.reply_text(msg, reply_markup=kb)
-        return
-    await message.reply_text("Use /start for menu.\nAdmin commands: /batch, /set_shortlink, /add_admin, /settings")
-
-@StreamBot.on_message(filters.command(["about"]))
-async def about_cmd(client: Client, message: Message):
-    await message.reply_text("**Advanced File Bot**\nDev: @Anime_Hindii_Flixx\nVersion: 5.0")
-
-# ========== ADMIN TEXT COMMANDS ==========
-@StreamBot.on_message(filters.command(["set_shortlink"]) & filters.user(config["admins"]))
-async def set_shortlink_text(client: Client, message: Message):
-    args = message.text.split(maxsplit=2)
-    if len(args) == 2 and args[1].lower() == "on":
-        config["shortlink_enabled"] = True
-        save_config(config)
-        await message.reply("✅ Shortlink enabled.")
-    elif len(args) == 2 and args[1].lower() == "off":
-        config["shortlink_enabled"] = False
-        save_config(config)
-        await message.reply("❌ Shortlink disabled.")
-    elif len(args) == 3:
-        url, api = args[1], args[2]
-        config["shortlink_url"] = url
-        config["shortlink_api"] = api
-        config["shortlink_enabled"] = True
-        save_config(config)
-        await message.reply(f"✅ Shortlink API set.\nURL: {url}\nAPI: {api[:10]}...")
-    else:
-        await message.reply("Usage:\n/set_shortlink on/off\n/set_shortlink <url> <api>")
-
-@StreamBot.on_message(filters.command(["add_admin"]) & filters.user(config["admins"]))
-async def add_admin_text(client: Client, message: Message):
-    try:
-        uid = int(message.text.split()[1])
-        if uid not in config["admins"]:
-            config["admins"].append(uid)
-            save_config(config)
-            await message.reply(f"✅ Admin {uid} added.")
-        else:
-            await message.reply("Already admin.")
-    except:
-        await message.reply("Usage: /add_admin <user_id>")
-
-@StreamBot.on_message(filters.command(["remove_admin"]) & filters.user(config["admins"]))
-async def remove_admin_text(client: Client, message: Message):
-    try:
-        uid = int(message.text.split()[1])
-        if uid in config["admins"] and uid != config["admins"][0]:
-            config["admins"].remove(uid)
-            save_config(config)
-            await message.reply(f"✅ Admin {uid} removed.")
-        else:
-            await message.reply("Cannot remove that admin.")
-    except:
-        await message.reply("Usage: /remove_admin <user_id>")
-
-@StreamBot.on_message(filters.command(["settings"]) & filters.user(config["admins"]))
-async def settings_text(client: Client, message: Message):
-    await message.reply(f"Shortlink: {config['shortlink_enabled']}\nAdmins: {config['admins']}\nCaption: {config['caption_prefix'][:30]}...")
-
-# ========== CALLBACK HANDLERS ==========
-@StreamBot.on_callback_query()
-async def callback_handler(client: Client, query: CallbackQuery):
-    data = query.data
-    if data == "refresh_sub":
-        subscribed, msg, kb = await check_force_sub(query.from_user.id)
-        if subscribed:
-            await query.message.edit_text("✅ You are now subscribed! Use /start.")
-        else:
-            await query.message.edit_text(msg, reply_markup=kb)
-    elif data == "help":
-        await query.message.edit_text("Use /start for menu.\nAdmin: /batch, /set_shortlink", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="main_menu")]]))
-    elif data == "about":
-        me = await client.get_me()
-        await query.message.edit_text(f"**Bot:** {me.first_name}\nDev: @Anime_Hindii_Flixx", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="main_menu")]]))
-    elif data == "support":
-        await query.message.edit_text(f"**Support:** {config['support']}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="main_menu")]]))
-    elif data == "admin_panel":
-        if await is_admin(query.from_user.id):
-            await query.message.edit_text("Admin panel:\n/set_shortlink\n/add_admin\n/remove_admin\n/settings", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="main_menu")]]))
-        else:
-            await query.answer("Admin only", show_alert=True)
-    elif data == "main_menu":
-        buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton("📋 Commands", callback_data="help")],
-            [InlineKeyboardButton("ℹ️ About", callback_data="about"), InlineKeyboardButton("📢 Support", callback_data="support")],
-            [InlineKeyboardButton("⚙️ Admin Panel", callback_data="admin_panel")] if await is_admin(query.from_user.id) else []
-        ])
-        await query.message.edit_text("**Main Menu**", reply_markup=buttons)
-    await query.answer()
-
 # ========== SET TELEGRAM COMMANDS ==========
 async def set_telegram_commands():
     cmds = [
         BotCommand("start", "Main menu"),
-        BotCommand("help", "Help"),
-        BotCommand("about", "Bot info"),
-        BotCommand("batch", "Batch create (admin)"),
-        BotCommand("set_shortlink", "Manage shortlink (admin)"),
-        BotCommand("add_admin", "Add admin (admin)"),
-        BotCommand("remove_admin", "Remove admin (admin)"),
-        BotCommand("settings", "View settings (admin)"),
+        BotCommand("genlink", "Store single file"),
+        BotCommand("batch", "Batch from channel"),
+        BotCommand("custom_batch", "Random messages batch"),
+        BotCommand("special_link", "Editable link (moderators)"),
+        BotCommand("broadcast", "Broadcast to users"),
+        BotCommand("settings", "Settings"),
+        BotCommand("universal_link", "Universal access link"),
+        BotCommand("shortener", "Shorten any link"),
+        BotCommand("ban", "Ban user"),
+        BotCommand("unban", "Unban user"),
     ]
     await StreamBot.set_bot_commands(cmds)
 
@@ -404,11 +576,10 @@ async def start():
     Temp.BOT = StreamBot
     Temp.ME = me.id
     await set_telegram_commands()
-    # web server
     runner = web.AppRunner(await web_server())
     await runner.setup()
     await web.TCPSite(runner, "0.0.0.0", PORT).start()
-    print(f"✅ @{me.username} is running!")
+    print(f"✅ @{me.username} is running!\nAll commands loaded.")
     await idle()
 
 if __name__ == "__main__":
