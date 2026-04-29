@@ -78,6 +78,7 @@ async def is_banned(user_id):
     return user_id in config.get("banned_users", [])
 
 async def check_force_sub(user_id):
+    # Use StreamBot (the client) only after it's started
     if not config.get("force_sub_channels"):
         return True, None, None
     not_joined = []
@@ -540,6 +541,18 @@ async def file_handler(client: Client, message: Message):
         logger.error(e)
         await message.reply("Error processing file.")
 
+# ========== CALLBACK QUERY HANDLER ==========
+@StreamBot.on_callback_query()
+async def callback_handler(client: Client, query: CallbackQuery):
+    data = query.data
+    if data == "refresh_sub":
+        subscribed, msg, kb = await check_force_sub(query.from_user.id)
+        if subscribed:
+            await query.message.edit_text("✅ You are now subscribed! Use /start.")
+        else:
+            await query.message.edit_text(msg, reply_markup=kb)
+    await query.answer()
+
 # ========== SET TELEGRAM COMMANDS ==========
 async def set_telegram_commands():
     cmds = [
@@ -567,19 +580,22 @@ async def keep_alive():
         except:
             pass
 
-# ========== MAIN ==========
+# ========== MAIN START ==========
 async def start():
     print("🚀 Starting bot...")
+    # Initialize clients (this should start the client)
     await initialize_clients()
+    # No need to call StreamBot.start() again – it's started inside initialize_clients
     asyncio.create_task(keep_alive())
     me = await StreamBot.get_me()
     Temp.BOT = StreamBot
     Temp.ME = me.id
     await set_telegram_commands()
+    # Start web server
     runner = web.AppRunner(await web_server())
     await runner.setup()
     await web.TCPSite(runner, "0.0.0.0", PORT).start()
-    print(f"✅ @{me.username} is running!\nAll commands loaded.")
+    print(f"✅ @{me.username} is running!")
     await idle()
 
 if __name__ == "__main__":
