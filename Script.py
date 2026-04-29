@@ -1,27 +1,295 @@
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+
+
 class script(object):
-    START_TXT = """<b>Hey {}, </b>\n\n<blockquote><i>Send me a file or add me as an admin to any channel to instantly generate file links.\n\nInvite me to your channel and I’ll instantly create download links for any media you share. I’ll also add the right buttons to each post with a URL, making access seamless.</i></blockquote>\n\n<blockquote><a href=https://t.me/cantarellabots>➜ Add To Channel</a></blockquote>"""
 
-    RESTART_TXT = """\n<b>Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ !\n\n📅 Dᴀᴛᴇ : <code>{}</code>\n⏰ Tɪᴍᴇ : <code>{}</code>\n🌐 Tɪᴍᴇᴢᴏɴᴇ : <code>Asia/Kolkata</code>\n🛠️ Bᴜɪʟᴅ Sᴛᴀᴛᴜs: <code>v4.6.00 [ Sᴛᴀʙʟᴇ ]</code></b>"""
+    START_TXT = """<b>ʜᴇʟʟᴏ {}, ᴍʏ ɴᴀᴍᴇ {} 👋, ɪ ᴀᴍ ʟᴀᴛᴇꜱᴛ ᴀᴅᴠᴀɴᴄᴇᴅ ᴀɴᴅ ᴘᴏᴡᴇʀꜰᴜʟ ꜰɪʟᴇ ꜱᴛᴏʀᴇ ʙᴏᴛ + ᴄʟᴏɴᴇ ғᴇᴀᴛᴜʀᴇ + sᴛʀᴇᴀᴍ / ᴅᴏᴡɴʟᴏᴀᴅ ʟɪɴᴋ ғᴇᴀᴛᴜʀᴇ + ᴄᴜꜱᴛᴏᴍ ᴜʀʟ ꜱʜᴏʀᴛɴᴇʀ ꜱᴜᴘᴘᴏʀᴛ + ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ sᴜᴘᴘᴏʀᴛ ᴀɴᴅ ʙᴇꜱᴛ ᴜɪ ᴘᴇʀꜰᴏʀᴍᴀɴᴄᴇ </b>"""
 
-    HELP_TXT = """<blockquote><b>You don't need many commands to use this bot\n\nJust send me files and I will give you direct download & streaming link\n\nAlso you can use me in your channel just add me and make me admin and see my power 💥\n\nFor more, use /help command\nMore, use /about command</b></blockquote>"""
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
     
-    ADMIN_CMD_TXT = """<blockquote><b>\n\n# Admin Only Commands 👑  \n/ban - Ban a user/channel [FOR ADMINS USE ONLY]  \n/unban - Unban a user/channel [FOR ADMINS USE ONLY]  \n/broadcast - Send broadcast message [FOR ADMINS USE ONLY]  \n/pin_broadcast - Pin broadcast message [FOR ADMINS USE ONLY]  \n/restart - Restart the bot [FOR ADMINS USE ONLY]  \n/stats - Show bot statistics [FOR ADMINS USE ONLY]  \n/blocked - List of blocked users [FOR ADMINS USE ONLY] \n</b></blockquote>"""
 
-    HELP2_TXT = """<blockquote><b>How to Use File to Link Bot\n\nBasic Usage:\n• Send any file or media from Telegram\n• Bot will generate permanent download and stream links\n• Use these links to download or stream content through our servers\n• For streaming, paste the provided link in any video player\n\nKey Features:\n• Permanent link generation\n• Direct download support\n• Video streaming capability\n• Channel support (Add bot as admin)\n• Custom shortener integration\n• Unlimited file size support\n\nChannel Usage:\n1. Add bot as admin to your channel\n2. Bot will automatically process files\n3. Links will be generated for all media\n\n⚠️ Important Notes:\n• All links are permanent and won't expire\n• Sharing inappropriate content will result in permanent ban\n• Report any issues to our support team\n\n🔞 Adult content strictly prohibited.\n\n📮 Help & Support:\n• Updates: @CantarellaBots\n• Support: @CantarellaBots\n\n <u><i>Report bugs to <a href='https://t.me/cantarellabots'>Developer</a></u></i></b></blockquote>"""
+    CAPTION = """<b>📂 ғɪʟᴇɴᴀᴍᴇ : {file_name}
 
-    CAPTION = """🎬 <i><a href='{}'>{}</a></i>"""
+
+
+⚙️ sɪᴢᴇ : {file_size}
+
+
+
+Jᴏɪɴ [ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ](https://t.me/Anime_Hindii_Flixx)</b>""" 
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+    SHORTENER_API_MESSAGE = """<b>Tᴏ ᴀᴅᴅ ᴏʀ ᴜᴘᴅᴀᴛᴇ ʏᴏᴜʀ Sʜᴏʀᴛɴᴇʀ Wᴇʙsɪᴛᴇ API, /api (ᴀᴘɪ)
+
+            
+
+<b>Ex: /api 𝟼LZǫ𝟾𝟻𝟷sXᴏғғғPHᴜɢɪKQǫ
+
+
+
+<b>Cᴜʀʀᴇɴᴛ Wᴇʙsɪᴛᴇ: {base_site}
+
+
+
+Cᴜʀʀᴇɴᴛ Sʜᴏʀᴛᴇɴᴇʀ API:</b> `{shortener_api}`
+
+
+
+If You Want To Remove Api Then Copy This And Send To Bot - `/api None`"""
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+    CLONE_START_TXT = """<b>ʜᴇʟʟᴏ {}, ᴍʏ ɴᴀᴍᴇ {} 👋, ɪ ᴀᴍ ʟᴀᴛᴇꜱᴛ ᴀᴅᴠᴀɴᴄᴇᴅ ᴀɴᴅ ᴘᴏᴡᴇʀꜰᴜʟ ꜰɪʟᴇ ꜱᴛᴏʀᴇ ʙᴏᴛ + ᴄᴜꜱᴛᴏᴍ ᴜʀʟ ꜱʜᴏʀᴛɴᴇʀ ꜱᴜᴘᴘᴏʀᴛ ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ sᴜᴘᴘᴏʀᴛ ᴀɴᴅ ʙᴇꜱᴛ ᴜɪ ᴘᴇʀꜰᴏʀᴍᴀɴᴄᴇ
+
+
+
+ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴛʜɪs ғᴇᴀᴛᴜʀᴇ ᴛʜᴇɴ ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴏᴡɴ ᴄʟᴏɴᴇ ʙᴏᴛ ғʀᴏᴍ ᴍʏ <a href=https://t.me/Anime_Hindii_Flixx>ᴘᴀʀᴇɴᴛ</a></b>"""
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+    ABOUT_TXT = """<b>ʜɪ ɪ ᴀᴍ ᴘᴇʀᴍᴀɴᴇɴᴛ ғɪʟᴇ sᴛᴏʀᴇ ʙᴏᴛ ᴡɪᴛʜ ᴄʟᴏɴᴇ ғᴇᴀᴛᴜʀᴇ + ᴄᴜsᴛᴏᴍ ᴜʀʟ sʜᴏʀᴛɴᴇʀ ɪᴛ ᴍᴇᴀɴs ᴀɴʏ ᴜsᴇʀ ᴄᴀɴ sᴇᴛ ʜɪs ᴜʀʟ sʜᴏʀᴛɴᴇʀ ᴀɴᴅ + ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ.
+
+
+
+🤖 ᴍʏ ɴᴀᴍᴇ: {}
+
+
+
+📝 ʟᴀɴɢᴜᴀɢᴇ: <a href=https://www.python.org>𝐏𝐲𝐭𝐡𝐨𝐧𝟑</a>
+
+
+
+📚 ʟɪʙʀᴀʀʏ: <a href=https://docs.pyrogram.org>𝐏𝐲𝐫𝐨𝐠𝐫𝐚𝐦</a>
+
+
+
+🧑🏻‍💻 ᴅᴇᴠᴇʟᴏᴘᴇʀ: <a href=https://t.me/Anime_Hindii_Flixx>𝐀𝐧𝐢𝐦𝐞 𝐇𝐢𝐧𝐝𝐢𝐢 𝐅𝐥𝐢𝐱𝐱</a>
+
+
+
+👥 sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ: <a href=https://t.me/Anime_Hindii_Flixx>𝐀𝐧𝐢𝐦𝐞 𝐇𝐢𝐧𝐝𝐢𝐢 𝐅𝐥𝐢𝐱𝐱 𝐒𝐮𝐩𝐩𝐨𝐫𝐭</a>
+
+
+
+📢 ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ: <a href=https://t.me/Anime_Hindii_Flixx>𝐀𝐧𝐢𝐦𝐞 𝐇𝐢𝐧𝐝𝐢𝐢 𝐅𝐥𝐢𝐱𝐱 𝐔𝐩𝐝𝐚𝐭𝐞</a></b>
+
+"""
+
+
+
+    CABOUT_TXT = """<b>ʜɪ ɪ ᴀᴍ ᴘᴇʀᴍᴀɴᴇɴᴛ ғɪʟᴇ sᴛᴏʀᴇ ʙᴏᴛ ᴡɪᴛʜ ᴄʟᴏɴᴇ ғᴇᴀᴛᴜʀᴇ + ᴄᴜsᴛᴏᴍ ᴜʀʟ sʜᴏʀᴛɴᴇʀ ɪᴛ ᴍᴇᴀɴs ᴀɴʏ ᴜsᴇʀ ᴄᴀɴ sᴇᴛ ʜɪs ᴜʀʟ sʜᴏʀᴛɴᴇʀ ᴀɴᴅ + ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ.
+
+
+
+🤖 ᴍʏ ɴᴀᴍᴇ: {}
+
+
+
+📝 ʟᴀɴɢᴜᴀɢᴇ: <a href=https://www.python.org>𝐏𝐲𝐭𝐡𝐨𝐧𝟑</a>
+
+
+
+📚 ʟɪʙʀᴀʀʏ: <a href=https://docs.pyrogram.org>𝐏𝐲𝐫𝐨𝐠𝐫𝐚𝐦</a>
+
+
+
+🧑🏻‍💻 ᴅᴇᴠᴇʟᴏᴘᴇʀ: <a href=tg://user?id={}>ᴅᴇᴠᴇʟᴏᴘᴇʀ</a></b>
+
+"""
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+    CLONE_TXT = """<b>ʜᴇʟʟᴏ {} 👋
+
+
+
+First Send /clone command then follow below steps.
+
     
-    LOG_TEXT = """<b>#NewUser {}\n    \nID - <code>{}</code>\nNᴀᴍᴇ - {}</b>"""
 
-    ABOUT_TXT = """<blockquote><b>╔══❰ {} ❱═════❍\n║╭━━━━━━━━━━━━━━━━━━➣\n║┣⪼🤖My Name : {}\n║┣⪼👦Developer : <a href='https://t.me/cantarellabots'>Owner</a>\n║┣⪼❣️Update : <a href=https://t.me/cantarellabots>RexBots Official</a>\n║┣⪼⏲️Bot Uptime :- {}\n║┣⪼📡Hosted On : Koyeb \n║┣⪼🗣️Language : Python \n║┣⪼📚Library : Pyrogram\n║┣⪼🗒️Version : {} [Stable]\n║╰━━━━━━━━━━━━━━━➣\n╚══════════════════❍ </b></blockquote>"""
+1) sᴇɴᴅ <code>/newbot</code> ᴛᴏ @BotFather
 
-    AUTH_TXT = """<i><b>Hᴇʏ {}! 👋\n\nTᴏ ᴄᴏɴᴛɪɴᴜᴇ ᴜsɪɴɢ ᴛʜɪs ʙᴏᴛ, ᴘʟᴇᴀsᴇ ᴊᴏɪɴ ᴏᴜʀ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ 💬\n\nSᴇʀᴠᴇʀ ʟᴏᴀᴅ ɪs ʜɪɡʜ, sᴏ ᴀᴄᴄᴇss ɪs ʟɪᴍɪᴛᴇᴅ ᴛᴏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ᴍᴇᴍʙᴇʀs ᴏɴʟʏ 🚀</b></i>"""
+2) ɢɪᴠᴇ ᴀ ɴᴀᴍᴇ ꜰᴏʀ ʏᴏᴜʀ ʙᴏᴛ.
 
-    CAPTION_TXT = """\n<i><u>Your Link Generated !</u></i>\n\n<blockquote><b>📧 File Name :- </b> <i><a href={}>{}</a></i>\n\n<b>📦 File Size :- </b> <i>{}</i>\n\n<b><u><i>Tap To Copy Link 👇</i></u></b>\n\n<b>🖥 Stream  : </b> <code>{}</code>\n\n<b>📥 Download : </b> <code>{}</code>\n\n<b>🚸 Any issues dm : https://t.me/cantarellabots</b></blockquote>"""
+3) ɢɪᴠᴇ ᴀ ᴜɴɪǫᴜᴇ ᴜsᴇʀɴᴀᴍᴇ.
 
-    VERIFICATION_TEXT = """<b>👋 ʜᴇʏ {},\n\n📌 <u>ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴠᴇʀɪꜰɪᴇᴅ ᴛᴏᴅᴀʏ, ᴛᴀᴘ ᴏɴ ᴛʜᴇ ᴠᴇʀɪꜰʏ ʟɪɴᴋ & ɢᴇᴛ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇss ꜰᴏʀ ɴᴇxᴛ ꜰᴜʟʟ ᴅᴀʏ.</u></b>"""
+4) ᴛʜᴇɴ ʏᴏᴜ ᴡɪʟʟ ɢᴇᴛ ᴀ ᴍᴇssᴀɢᴇ ᴡɪᴛʜ ʏᴏᴜʀ ʙᴏᴛ ᴛᴏᴋᴇɴ.
+
+5) ꜰᴏʀᴡᴀʀᴅ ᴛʜᴀᴛ ᴍᴇssᴀɢᴇ ᴛᴏ ᴍᴇ.
+
+
+
+ᴛʜᴇɴ ɪ ᴀᴍ ᴛʀʏ ᴛᴏ ᴄʀᴇᴀᴛᴇ ᴀ ᴄᴏᴘʏ ʙᴏᴛ ᴏғ ᴍᴇ ғᴏʀ ʏᴏᴜ ᴏɴʟʏ 😌</b>"""
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+    HELP_TXT = """<b><u>💢 HOW TO USE THE BOT ☺️</u>
+
+
+
+🔻 /link - ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴠɪᴅᴇᴏ ᴏʀ ғɪʟᴇ ᴛᴏ ɢᴇᴛ sʜᴀʀᴀʙʟᴇ ʟɪɴᴋ
+
+
+
+🔻 /batch - sᴇɴᴅ ғɪʀsᴛ ʟɪɴᴋ ᴏғ ғɪʟᴇ sᴛᴏʀᴇ ᴄʜᴀɴɴᴇʟ ᴘᴏsᴛ ᴛʜᴇɴ ʟᴀsᴛ ᴘᴏsᴛ ʟɪɴᴋ ᴀɴᴅ ᴍᴀᴋᴇ sᴜʀᴇ ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ʏᴏᴜʀ ғɪʟᴇ sᴛᴏʀᴇ ᴄʜᴀɴɴᴇʟ.
+
+ᴇx - /batch https://t.me/Anime_Hindii_Flixx/25 https://t.me/Anime_Hindii_Flixx/30
+
+
+
+🔻 /clone - ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴏᴡɴ ɪᴅᴇɴᴛɪᴄᴀʟ ᴄʟᴏɴᴇ ʙᴏᴛ
+
+
+
+🔻 /base_site - ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴛᴏ sᴇᴛ ᴜʀʟ sʜᴏʀᴛɴᴇʀ ʟɪɴᴋ ᴅᴏᴍᴀɪɴ 
+
+ᴇx - /base_site ʏᴏᴜʀᴅᴏᴍᴀɪɴ.ᴄᴏᴍ
+
+
+
+🔻 /api - sᴇᴛ ʏᴏᴜʀ ᴜʀʟ sʜᴏʀᴛɴᴇʀ ᴀᴄᴄᴏᴜɴᴛ ᴀᴘɪ 
+
+ᴇx - /api ʙᴀᴏᴡɢᴡᴋʟᴀᴀʙᴀᴋʟ
+
+
+
+🔻 /deletecloned - ᴜsᴇ ᴛʜɪs ғᴏʀ ᴅᴇʟᴇᴛᴇ ʏᴏᴜʀ ᴄʟᴏɴᴇ ʙᴏᴛ 
+
+
+
+🔻 /broadcast - ʀᴇᴘʟʏ ᴛᴏ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ʙʀᴏᴀᴅᴄᴀsᴛ (ʙᴏᴛ ᴏᴡɴᴇʀ ᴏɴʟʏ)</b>"""
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+
+
+    CHELP_TXT = """<b>💢 Hᴏᴡ Tᴏ Usᴇ Tʜɪs Bᴏᴛ ☺️
+
+
+
+🔻 /link - ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴠɪᴅᴇᴏ ᴏʀ ғɪʟᴇ ᴛᴏ ɢᴇᴛ sʜᴀʀᴀʙʟᴇ ʟɪɴᴋ
+
+
+
+🔻 /base_site - ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴛᴏ sᴇᴛ ᴜʀʟ sʜᴏʀᴛɴᴇʀ ʟɪɴᴋ ᴅᴏᴍᴀɪɴ
+
+ᴇx - /base_site ʏᴏᴜʀᴅᴏᴍᴀɪɴ.ᴄᴏᴍ
+
+
+
+🔻 /api - sᴇᴛ ʏᴏᴜʀ ᴜʀʟ sʜᴏʀᴛɴᴇʀ ᴀᴄᴄᴏᴜɴᴛ ᴀᴘɪ
+
+ᴇx - /api ʙᴀᴏᴡɢᴡᴋʟᴀᴀʙᴀᴋʟ
+
+
+
+🔻 /broadcast - ʀᴇᴘʟʏ ᴛᴏ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ʙʀᴏᴀᴅᴄᴀsᴛ (ʙᴏᴛ ᴏᴡɴᴇʀ ᴏɴʟʏ)</b>"""
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
+
+
+
+    LOG_TEXT = """<b>#NewUser
+
     
-    VERIFIED_COMPLETE_TEXT = """<b>👋 ʜᴇʏ {},\n\nʏᴏᴜ ᴀʀᴇ ɴᴏᴡ ᴠᴇʀɪꜰɪᴇᴅ ꜰᴏʀ ᴛᴏᴅᴀʏ ☺️.\nᴇɴᴊᴏʏ ᴜɴʟɪᴍɪᴛᴇᴅ ᴍᴏᴠɪᴇs ᴏʀ sᴇʀɪᴇs ʟɪɴᴋs 💥.</b>"""
-    
-    VERIFIED_LOG_TEXT = """<b><u>☄ ᴜsᴇʀ ᴠᴇʀɪꜰɪᴇᴅ sᴜᴄᴄᴇssꜰᴜʟʟʏ ☄</u>\n\n⚡️ ɴᴀᴍᴇ:- {} [ <code>{}</code> ] \n📆 ᴅᴀᴛᴇ:- <code>{} </code></b>\n\n#verified_completed"""
 
+ID - <code>{}</code>
+
+
+
+Nᴀᴍᴇ - {}</b>
+
+"""
+
+    RESTART_TXT = """
+
+<b>Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ !
+
+
+
+📅 Dᴀᴛᴇ : <code>{}</code>
+
+⏰ Tɪᴍᴇ : <code>{}</code>
+
+🌐 Tɪᴍᴇᴢᴏɴᴇ : <code>Asia/Kolkata</code>
+
+🛠️ Bᴜɪʟᴅ Sᴛᴀᴛᴜs: <code>v2.7.1 [ Sᴛᴀʙʟᴇ ]</code></b>"""
+
+
+
+# Don't Remove Credit Tg - @Anime_Hindii_Flixx
+
+# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Anime_Hindii_Flixx
+
+# Ask Doubt on telegram @Anime_Hindii_Flixx
