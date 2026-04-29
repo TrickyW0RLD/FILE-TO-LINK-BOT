@@ -2,7 +2,7 @@ import os, sys, asyncio, logging, re, json, time, random, string
 from datetime import datetime
 from urllib.parse import quote_plus
 
-# Event loop fix
+# Event loop fix for Python 3.10+
 try:
     loop = asyncio.get_running_loop()
 except RuntimeError:
@@ -61,7 +61,7 @@ def save_config(data):
 
 config = load_config()
 
-# ========== PEER ID PATCH ==========
+# ========== PEER ID PATCH (for newer Pyrogram) ==========
 def get_peer_type_new(peer_id: int) -> str:
     s = str(peer_id)
     if not s.startswith("-"): return "user"
@@ -70,7 +70,7 @@ def get_peer_type_new(peer_id: int) -> str:
 pyrogram.utils.get_peer_type = get_peer_type_new
 pyrogram.utils.MIN_CHANNEL_ID = -1002822095763
 
-# ========== HELPERS ==========
+# ========== HELPER FUNCTIONS ==========
 async def is_admin(user_id):
     return user_id in config["admins"]
 
@@ -78,7 +78,6 @@ async def is_banned(user_id):
     return user_id in config.get("banned_users", [])
 
 async def check_force_sub(user_id):
-    # Use StreamBot (the client) only after it's started
     if not config.get("force_sub_channels"):
         return True, None, None
     not_joined = []
@@ -152,7 +151,7 @@ async def forward_to_bin(message):
     direct_link = f"{URL}/watch/{fid}" if fid and URL else None
     return fid, direct_link
 
-# ========== COMMANDS ==========
+# ========== COMMAND HANDLERS ==========
 
 @StreamBot.on_message(filters.command(["start"]))
 async def start_cmd(client: Client, message: Message):
@@ -580,22 +579,33 @@ async def keep_alive():
         except:
             pass
 
-# ========== MAIN START ==========
+# ========== MAIN START (with client start fix) ==========
 async def start():
     print("🚀 Starting bot...")
-    # Initialize clients (this should start the client)
+    # IMPORTANT: Start the client first
+    await StreamBot.start()
+    logger.info("Client started successfully.")
+    
+    # Initialize additional clients (if any)
     await initialize_clients()
-    # No need to call StreamBot.start() again – it's started inside initialize_clients
+    
+    # Start keep-alive task
     asyncio.create_task(keep_alive())
+    
+    # Get bot info
     me = await StreamBot.get_me()
     Temp.BOT = StreamBot
     Temp.ME = me.id
+    
+    # Set bot commands for Telegram menu
     await set_telegram_commands()
+    
     # Start web server
     runner = web.AppRunner(await web_server())
     await runner.setup()
     await web.TCPSite(runner, "0.0.0.0", PORT).start()
-    print(f"✅ @{me.username} is running!")
+    
+    print(f"✅ @{me.username} is running!\nAll commands loaded.")
     await idle()
 
 if __name__ == "__main__":
