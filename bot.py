@@ -7,42 +7,40 @@ import logging
 import importlib
 from pathlib import Path
 from datetime import date, datetime
-from typing import Union, Optional, AsyncGenerator
 
-# ======================== EVENT LOOP FIX FOR PYTHON 3.10+ ========================
+# ========== EVENT LOOP FIX (Python 3.10+) ==========
 try:
     loop = asyncio.get_running_loop()
 except RuntimeError:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-from pyrogram import idle, filters, Client
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram import idle, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import pyrogram.utils
 
-# ======================== PEER ID PATCH ========================
+# ========== PEER ID PATCH ==========
 def get_peer_type_new(peer_id: int) -> str:
-    peer_id_str = str(peer_id)
-    if not peer_id_str.startswith("-"):
+    s = str(peer_id)
+    if not s.startswith("-"):
         return "user"
-    elif peer_id_str.startswith("-100"):
+    elif s.startswith("-100"):
         return "channel"
     else:
         return "chat"
-
 pyrogram.utils.get_peer_type = get_peer_type_new
 pyrogram.utils.MIN_CHANNEL_ID = -1002822095763
 
-# ======================== LOGGING SETUP ========================
+# ========== LOGGING ==========
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
-logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
 
-# ======================== IMPORTS FROM OTHER FILES ========================
+# ========== IMPORTS FROM YOUR PROJECT ==========
 from info import *
 from Script import script
 from aiohttp import web
@@ -51,87 +49,68 @@ from web.server import StreamBot
 from utils import Temp, ping_server
 from web.server.clients import initialize_clients
 
-# ======================== LOAD PLUGINS ========================
-ppath = "plugins/*.py"
-files = glob.glob(ppath)
+# ========== KEEP ALIVE FUNCTION (prevents bot from sleeping) ==========
+async def keep_alive():
+    while True:
+        await asyncio.sleep(180)  # Har 3 minute
+        try:
+            me = await StreamBot.get_me()
+            logger.info(f"Keep-alive: @{me.username} is alive")
+        except Exception as e:
+            logger.error(f"Keep-alive error: {e}")
+            try:
+                await StreamBot.restart()
+            except:
+                pass
 
-# Start bot client
-StreamBot.start()
-bot_info = loop.run_until_complete(StreamBot.get_me())
-
-# ======================== COMMAND HANDLER FOR /start AND /help ========================
+# ========== COMMANDS (so that /start shows menu) ==========
 @StreamBot.on_message(filters.command(["start", "help"]))
-async def show_commands(client: Client, message: Message):
-    """Send a list of available commands to the user"""
-    commands_text = """
-**🤖 Available Commands:**
+async def show_commands(client, message):
+    text = """**🤖 Bot Commands:**
 
-/start - Start the bot and show welcome message
-/help - Show this help message with all commands
-/about - About this bot
-/status - Check bot status (for admins)
+/start - Start the bot
+/help - Show this help
+/about - About bot
 
-**📁 File Upload:**
-Simply send me any file/document/video/photo and I'll give you a direct download link!
+**📁 How to use:**
+Just send me any file (photo, video, document, audio) and I will give you a direct download link.
 
 **🔗 Features:**
-- Generate instant download links from files
-- No size limit (Telegram's 2GB limit applies)
-- Works in groups and channels (if admin)
-- Premium user support with expiry
-
-**👨‍💻 Admin Commands:**
-/broadcast - Send message to all users
-/stats - Get bot statistics
-/users - List all users
-/premium - Manage premium users
-"""
-    # Buttons for better UI (optional)
+- Instant links
+- No size limit (up to 2GB due to Telegram)
+- Works in groups (admin required)"""
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📢 Support Group", url="https://t.me/your_support_group")],
-        [InlineKeyboardButton("📝 Source Code", url="https://github.com/TrickyW0RLD/FILE-TO-LINK-BOT")]
+        [InlineKeyboardButton("📢 Support", url="https://t.me/your_support")]
     ])
-    await message.reply_text(commands_text, reply_markup=buttons, disable_web_page_preview=True)
+    await message.reply_text(text, reply_markup=buttons)
 
-# Optional: /about command
 @StreamBot.on_message(filters.command("about"))
-async def about_bot(client: Client, message: Message):
-    about_text = """
-**📌 About This Bot**
+async def about_bot(client, message):
+    await message.reply_text("**File to Link Bot**\nVersion 2.0\nMade with Pyrogram\nHosted on Render")
 
-🤖 **Name:** File to Link Bot
-📦 **Version:** 2.0
-👨‍💻 **Developer:** TrickyW0RLD
-⚙️ **Language:** Python 3.10+ with Pyrogram
-🌐 **Hosted on:** Render
-
-**What it does:**
-Send me any file and I'll generate a permanent direct download link for you.
-
-**Privacy:**
-We don't store any files. Links are generated on the fly.
-"""
-    await message.reply_text(about_text)
-
-# ======================== MAIN START FUNCTION ========================
+# ========== MAIN START FUNCTION ==========
 async def start():
-    print('\n')
-    print('🤖 Initializing Your Bot...')
-    bot_info = await StreamBot.get_me()
+    print("\n🚀 Initializing Bot...")
+    
+    # Start keep-alive task (important for Render)
+    asyncio.create_task(keep_alive())
+    
+    # Initialize clients
     await initialize_clients()
     
-    # Load all plugins
+    # Load all plugins from plugins/ folder
+    ppath = "plugins/*.py"
+    files = glob.glob(ppath)
     for name in files:
-        with open(name) as a:
-            patt = Path(a.name)
-            plugin_name = patt.stem.replace(".py", "")
+        with open(name) as f:
+            plugin_name = Path(f.name).stem
             plugins_dir = Path(f"plugins/{plugin_name}.py")
-            import_path = "plugins.{}".format(plugin_name)
+            import_path = f"plugins.{plugin_name}"
             spec = importlib.util.spec_from_file_location(import_path, plugins_dir)
-            load = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(load)
-            sys.modules["plugins." + plugin_name] = load
-            print("✅ Imported => " + plugin_name)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            sys.modules[import_path] = mod
+            print(f"✅ Imported plugin: {plugin_name}")
     
     if ON_HEROKU:
         asyncio.create_task(ping_server())
@@ -142,43 +121,40 @@ async def start():
     Temp.U_NAME = me.username
     Temp.B_NAME = me.first_name
     
+    # Send startup notification (optional)
     tz = pytz.timezone('Asia/Kolkata')
-    today = date.today()
     now = datetime.now(tz)
-    time = now.strftime("%H:%M:%S %p")
-    
-    StreamBot.loop.create_task(check_expired_premium(StreamBot))
-    
-    # Send startup messages to log channel and admins
+    time_str = now.strftime("%H:%M:%S %p")
     try:
-        await StreamBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
-    except Exception as e:
-        logging.error(f"Could not send to LOG_CHANNEL: {e}")
+        await StreamBot.send_message(LOG_CHANNEL, f"✅ Bot restarted at {time_str}")
+    except:
+        pass
     
-    try:
-        await StreamBot.send_message(chat_id=ADMINS[0], text='✅ <b>Bot Restarted Successfully!</b>')
-    except Exception as e:
-        logging.error(f"Could not send to ADMINS: {e}")
-    
-    try:
-        await StreamBot.send_message(chat_id=SUPPORT_GROUP, text=f"<b>{me.mention} is Alive 🎉</b>")
-    except Exception as e:
-        logging.error(f"Could not send to SUPPORT_GROUP: {e}")
-    
-    # Start web server
-    app = web.AppRunner(await web_server())
-    await app.setup()
+    # Start web server (required for Render to keep alive)
+    app_runner = web.AppRunner(await web_server())
+    await app_runner.setup()
     bind_address = "0.0.0.0"
-    await web.TCPSite(app, bind_address, PORT).start()
+    port = int(os.environ.get("PORT", 8080))
+    await web.TCPSite(app_runner, bind_address, port).start()
+    logger.info(f"🌐 Web server started on port {port}")
     
-    print(f"🚀 Bot is running! Username: @{me.username}")
+    print(f"✅ Bot is running! Username: @{me.username}")
     await idle()
 
-# ======================== RUN THE BOT ========================
-if __name__ == '__main__':
+# ========== RUN WITH AUTO-RECONNECT ==========
+async def run_with_reconnect():
+    while True:
+        try:
+            await start()
+        except Exception as e:
+            logger.error(f"Bot crashed: {e}")
+            logger.info("Restarting in 10 seconds...")
+            await asyncio.sleep(10)
+
+if __name__ == "__main__":
     try:
-        loop.run_until_complete(start())
+        loop.run_until_complete(run_with_reconnect())
     except KeyboardInterrupt:
-        logging.info('🛑 Service Stopped')
+        logger.info("Bot stopped manually")
     except Exception as e:
-        logging.error(f"❌ Fatal Error: {e}")
+        logger.error(f"Fatal error: {e}")
