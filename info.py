@@ -1,91 +1,28 @@
 import os
-from Script import script
 
-# ========== TOKEN & API ==========
+# ========== TELEGRAM API ==========
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 API_ID = int(os.environ.get("API_ID", 0))
 API_HASH = os.environ.get("API_HASH", "")
-SESSION = os.environ.get("SESSION", "FileLinkBot")
+SESSION = os.environ.get("SESSION", "SimpleBot")
 PORT = int(os.environ.get("PORT", 8080))
 
-# ========== ADMINS & OWNER ==========
+# ========== ADMINS (space separated IDs) ==========
 ADMINS = [int(i) for i in os.environ.get("ADMINS", "").split() if i]
-OWNER_USERNAME = os.environ.get("OWNER_USERNAME", "Anime_Hindii_Flixx")
-BOT_USERNAME = os.environ.get("BOT_USERNAME", "FileLinkBot")
 
-# ========== FORCE SUBSCRIBE CHANNELS ==========
+# ========== FORCE SUBSCRIBE CHANNELS (space separated IDs) ==========
 AUTH_CHANNEL = [int(i) for i in os.environ.get("AUTH_CHANNEL", "").split() if i]
-FSUB = True if AUTH_CHANNEL else False
 
-# ========== LOG, BIN, PREMIUM, VERIFIED, SUPPORT ==========
-LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", 0))
+# ========== BIN CHANNEL (to store files) ==========
 BIN_CHANNEL = int(os.environ.get("BIN_CHANNEL", 0))
-PREMIUM_LOGS = int(os.environ.get("PREMIUM_LOGS", 0))
-VERIFIED_LOG = int(os.environ.get("VERIFIED_LOG", 0))
-SUPPORT_GROUP = int(os.environ.get("SUPPORT_GROUP", 0))
 
-# ========== SUPPORT LINKS ==========
-CHANNEL = os.environ.get("CHANNEL", "https://t.me/Anime_Hindii_Flixx")
-SUPPORT = os.environ.get("SUPPORT", "https://t.me/Anime_Hindii_Flixx")
-HOW_TO_VERIFY = os.environ.get("HOW_TO_VERIFY", "")
-HOW_TO_OPEN = os.environ.get("HOW_TO_OPEN", "")
-
-# ========== SHORTLINK ==========
-IS_SHORTLINK = False
+# ========== SHORTLINK (optional) ==========
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "")
 
-# ========== DATABASE ==========
-DB_URL = os.environ.get("DATABASE_URI", "")
-DB_NAME = os.environ.get("DATABASE_NAME", "filelinkbot")
+# ========== LINKS FOR BUTTONS ==========
+CHANNEL_LINK = os.environ.get("CHANNEL", "https://t.me/Anime_Hindii_Flixx")
+SUPPORT_LINK = os.environ.get("SUPPORT", "https://t.me/Anime_Hindii_Flixx")
 
-# ========== FEATURES ==========
-PUBLIC_FILE_STORE = False   # Only admin upload
-PROTECT_CONTENT = False
-ENABLE_LIMIT = True
-BATCH_VERIFY = False
-VERIFY = False
-MAINTENANCE_MODE = False
-
-# ========== IMAGES & CAPTIONS ==========
-QR_CODE = os.environ.get("QR_CODE", "")
-VERIFY_IMG = os.environ.get("VERIFY_IMG", "")
-AUTH_PICS = os.environ.get("AUTH_PICS", "")
-PICS = os.environ.get("PICS", "")
-FILE_PIC = os.environ.get("FILE_PIC", "")
-FILE_CAPTION = os.environ.get("FILE_CAPTION", script.CAPTION)
-BATCH_FILE_CAPTION = os.environ.get("BATCH_FILE_CAPTION", script.CAPTION)
-CHANNEL_FILE_CAPTION = os.environ.get("CHANNEL_FILE_CAPTION", script.CAPTION)
-
-# ========== TIME & LIMITS ==========
-PING_INTERVAL = int(os.environ.get("PING_INTERVAL", 1200))
-SLEEP_THRESHOLD = int(os.environ.get("SLEEP_THRESHOLD", 60))
-RATE_LIMIT_TIMEOUT = int(os.environ.get("RATE_LIMIT_TIMEOUT", 600))
-MAX_FILES = int(os.environ.get("MAX_FILES", 50))
-VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", 60))
-
-# ========== WORKERS ==========
-WORKERS = int(os.environ.get("WORKERS", 10))
-MULTI_CLIENT = False
-NAME = os.environ.get("NAME", "FileLinkBot")
-
-# ========== WEB SERVER (RENDER) ==========
-ON_HEROKU = False
-ON_RENDER = True
-NO_PORT = os.environ.get("NO_PORT", "true").lower() in ("true", "1", "yes")
-HAS_SSL = os.environ.get("HAS_SSL", "true").lower() in ("true", "1", "yes")
-
-BIND_ADDRESS = os.environ.get("WEB_SERVER_BIND_ADDRESS", "")
-FQDN = os.environ.get("FQDN", BIND_ADDRESS)
-
-if ON_RENDER:
-    FQDN = os.environ.get("RENDER_EXTERNAL_HOSTNAME", FQDN)
-
-if not FQDN.startswith("http"):
-    protocol = "https" if HAS_SSL else "http"
-    port_segment = "" if NO_PORT else f":{PORT}"
-    FQDN = FQDN.rstrip('/')
-    URL = f"{protocol}://{FQDN}{port_segment}/"
-else:
-    URL = FQDN
-    
+# ========== CAPTION PREFIX (your username) ==========
+CAPTION_PREFIX = "✨ **Shared by:** @Anime_Hindii_Flixx"
