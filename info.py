@@ -3,7 +3,7 @@ from Script import script
 
 # ==================== BOT TOKEN & API ====================
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")  # Telegram BotFather se lo
-API_ID = int(os.environ.get("API_ID", 0))    # my.telegram.org se lo
+API_ID = int(os.environ.get("API_ID", ""))    # my.telegram.org se lo
 API_HASH = os.environ.get("API_HASH", "")    # my.telegram.org se lo
 
 # ==================== OWNER & ADMINS ====================
